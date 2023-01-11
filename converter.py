@@ -4,10 +4,11 @@ from pprint import pprint
 
 
 class Course:
-    def __init__(self, info):
-        self.name = info.name
-        self.code = info.code
-        self.section = info.section
+    def __init__(self, name, code, section):
+        self.name = name
+        self.code = code
+        self.section = section
+
 
 courseList = []
 
@@ -37,19 +38,30 @@ def parse_file(path):
                 name = match.group('name')
                 code = match.group('code')
                 section = match.group('section')
-                print(name, code, section)
+                newCourse = Course(name, code, section)
 
             if key == 'instructor':
-                pass
+                newCourse.instructor = match.group('instructor')
 
             if key == 'classInfo':
-                pass
+                # TODO: parse into date objects?
+                newCourse.type = match.group('type')
+                newCourse.times = {
+                    'start': match.group('startTime'),
+                    'end': match.group('endTime')
+                }
+                newCourse.dates = {
+                    'start': match.group('startDate'),
+                    'end': match.group('endDate')
+                }
+                newCourse.days = match.group('days')
+                courseList.append(newCourse)
 
             line = file.readline()
+    pass
 
-    return data
 
-parse_file('course.txt')
+parse_file('paste.txt')
 
 for course in courseList:
     pprint(course.__dict__, indent=2)
