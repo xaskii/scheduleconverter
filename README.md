@@ -1,6 +1,20 @@
 # scheduleconverter
 
-very in progress
+Converts "Detailed Schedule" page from Carleton Central to an **icalendar** that you can import
+
+## Setup
+
+Use [pip](https://pip.pypa.io/en/stable/) to install the dependencies
+
+In terminal or cmd:
+
+```bash
+python3 pip install -r requirements.txt
+```
+
+## Usage
+
+TBD, have to change stuff to not use a file input
 
 ## TODO
 
@@ -12,3 +26,6 @@ very in progress
 ## Notes
 
 - Dictionaries in py are the equiavalent to JS objects?
+
+---
+\- Xavi
