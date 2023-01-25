@@ -25,7 +25,7 @@ TBD, have to change stuff to not use a file input
 
 ## Notes
 
-- Dictionaries in py are the equiavalent to JS objects?
+- Took longer than doing it manually T_T
 
 ---
 \- Xavi
