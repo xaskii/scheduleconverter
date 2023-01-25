@@ -37,4 +37,4 @@ def daysToRRULE(days):
     for day in days:
         codes.append(lookup[day])
 
-    return ','.join(codes)
+    return codes

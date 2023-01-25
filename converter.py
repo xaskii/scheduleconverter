@@ -1,8 +1,8 @@
 import re
 import os
 import pytz
-from icalendar import Calendar, Event, vDatetime, vDDDTypes
-from datetime import datetime, timedelta, date, time
+from icalendar import Calendar, Event,  vDDDTypes
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 
 from helper import objprint, iCalToString, getNextWeekday, daysToRRULE
@@ -96,20 +96,28 @@ for course in courseList:
     event['description'] = course.name
     event['location'] = course.location
 
-    untilDate = vDDDTypes(course.dates['end']).to_ical().decode('utf-8')
+    # untilDate = vDDDTypes(course.dates['end']).to_ical().decode('utf-8')
+    untilDate = course.dates['end']
     startDate = vDDDTypes(datetime.combine(
         getNextWeekday(course.dates['start'].date(), course.days[0]), course.times['start'].time()))
 
     event['dtstart'] = startDate
     event['duration'] = vDDDTypes(course.times['end'] - course.times['start'])
-    event['rrule'] = [
-        'FREQ=WEEKLY',
-        'COUNT=12',
-        f'UNTIL={untilDate}',
-        # ESCAPES THE COMMAS???? WHAT DO I DO LOL???
-        # ?????????????????????????????????????
-        f'BYDAY={daysToRRULE(course.days)}'
-    ]
+    # event['rrule'] = [
+    #     'FREQ=WEEKLY',
+    #     'COUNT=12',
+    #     f'UNTIL={untilDate}',
+    #     # ESCAPES THE COMMAS???? WHAT DO I DO LOL???
+    #     # ?????????????????????????????????????
+    #     f'BYDAY={daysToRRULE(course.days)}'
+    # ]
+    # FOUND FORMAT IN GITHUB ISSUE
+    event.add('rrule', {
+        'FREQ': 'WEEKLY',
+        'COUNT': 12,
+        'UNTIL': untilDate,
+        'BYDAY': daysToRRULE(course.days)
+    })
 
     cal.add_component(event)
 
