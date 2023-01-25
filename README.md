@@ -1,11 +1,14 @@
 # scheduleconverter
-super in progress, schedule to icalconvert
 
-# TODO
+very in progress
+
+## TODO
+
 - [x] Find iCalendar file library
 - [x] Parse out paste from Detailed Schedule page
-- [ ] Solve reoccuring event problem (have to add an event for every weekday between two dates)
-- [ ] Make a front-end?
+- [x] Solve reoccuring event problem (finally fixed holy)
+- [ ] Change into an API then make a front-end
 
-# Notes
+## Notes
+
 - Dictionaries in py are the equiavalent to JS objects?
