@@ -21,7 +21,7 @@ rx_dict = {
     'course': re.compile(r'(?P<name>.+) - (?P<code>.+) - (?P<section>\w+)\n'),
     'instructor': re.compile(r'Assigned Instructor:\s(?P<instructor>.+)\n'),
     'classInfo': re.compile(r'Class\t(?P<startTime>\d{1,2}:\d{2} \w{2}) - (?P<endTime>\d{1,2}:\d{2} \w{2})\t('
-                            r'?P<days>\w+)\t(?P<building>.*)\t(?P<startDate>.*)\ - (?P<endDate>.*)\t(?P<type>.*)\t.*\n')
+                            r'?P<days>\w+)\t(?P<building>.*)\t(?P<startDate>.*) - (?P<endDate>.*)\t(?P<type>.*)\t.*\n')
 }
 
 timezone = pytz.timezone("US/Eastern")
