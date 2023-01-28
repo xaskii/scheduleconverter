@@ -5,7 +5,7 @@ from icalendar import Calendar, Event,  vDDDTypes
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 
-from helper import objprint, iCalToString, getNextWeekday, daysToRRULE
+from helper import objprint, i_cal_to_string, get_next_weekday, days_to_rrule
 
 
 class Course:
@@ -20,7 +20,8 @@ courseList = []
 rx_dict = {
     'course': re.compile(r'(?P<name>.+) - (?P<code>.+) - (?P<section>\w+)\n'),
     'instructor': re.compile(r'Assigned Instructor:\s(?P<instructor>.+)\n'),
-    'classInfo': re.compile(r'Class\t(?P<startTime>\d{1,2}:\d{2} \w{2}) - (?P<endTime>\d{1,2}:\d{2} \w{2})\t(?P<days>\w+)\t(?P<building>.*)\t(?P<startDate>.*)\ - (?P<endDate>.*)\t(?P<type>.*)\t.*\n')
+    'classInfo': re.compile(r'Class\t(?P<startTime>\d{1,2}:\d{2} \w{2}) - (?P<endTime>\d{1,2}:\d{2} \w{2})\t('
+                            r'?P<days>\w+)\t(?P<building>.*)\t(?P<startDate>.*)\ - (?P<endDate>.*)\t(?P<type>.*)\t.*\n')
 }
 
 timezone = pytz.timezone("US/Eastern")
@@ -55,30 +56,30 @@ def parse_file(path):
             key, match = _parse_line(line)
 
             if key == 'course':
-                newCourse = None
+                new_course = None
                 name = match.group('name')
                 code = match.group('code')
                 section = match.group('section')
-                newCourse = Course(name, code, section)
+                new_course = Course(name, code, section)
 
             if key == 'instructor':
-                newCourse.instructor = match.group('instructor')
+                new_course.instructor = match.group('instructor')
 
             if key == 'classInfo':
-                newCourse.location = match.group('building')
+                new_course.location = match.group('building')
                 # TODO: parse into date objects? done haha
-                newCourse.type = match.group('type')
-                newCourse.times = {
+                new_course.type = match.group('type')
+                new_course.times = {
                     'start': parse(match.group('startTime')),
                     'end': parse(match.group('endTime'))
                 }
-                newCourse.dates = {
+                new_course.dates = {
                     'start': parse(match.group('startDate')),
                     'end': parse(match.group('endDate'))
                 }
                 # TODO: figure out starting days
-                newCourse.days = match.group('days')
-                courseList.append(newCourse)
+                new_course.days = match.group('days')
+                courseList.append(new_course)
 
     pass
 
@@ -99,7 +100,7 @@ for course in courseList:
     # untilDate = vDDDTypes(course.dates['end']).to_ical().decode('utf-8')
     untilDate = course.dates['end']
     startDate = vDDDTypes(datetime.combine(
-        getNextWeekday(course.dates['start'].date(), course.days[0]), course.times['start'].time()))
+        get_next_weekday(course.dates['start'].date(), course.days[0]), course.times['start'].time()))
 
     event['dtstart'] = startDate
     event['duration'] = vDDDTypes(course.times['end'] - course.times['start'])
@@ -109,21 +110,21 @@ for course in courseList:
     #     f'UNTIL={untilDate}',
     #     # ESCAPES THE COMMAS???? WHAT DO I DO LOL???
     #     # ?????????????????????????????????????
-    #     f'BYDAY={daysToRRULE(course.days)}'
+    #     f'BYDAY={days_to_rrule(course.days)}'
     # ]
     # FOUND FORMAT IN GITHUB ISSUE
     event.add('rrule', {
         'FREQ': 'WEEKLY',
         'COUNT': 12,
         'UNTIL': untilDate,
-        'BYDAY': daysToRRULE(course.days)
+        'BYDAY': days_to_rrule(course.days)
     })
 
     cal.add_component(event)
 
     # break  # making first event
 
-# print(iCalToString(cal))
+# print(i_cal_to_string(cal))
 
 # write to file
 directory = os.getcwd()
