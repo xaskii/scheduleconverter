@@ -7,26 +7,16 @@ from dateutil.parser import parse
 
 from helper import objprint, i_cal_to_string, get_next_weekday, days_to_rrule
 
-
-class Course:
-    def __init__(self, name, code, section):
-        self.name = name
-        self.code = code
-        self.section = section
-
-
-courseList = []
-
-rx_dict = {
+REGEX_DICTIONARY = {
     'course': re.compile(r'(?P<name>.+) - (?P<code>.+) - (?P<section>\w+)\n'),
     'instructor': re.compile(r'Assigned Instructor:\s(?P<instructor>.+)\n'),
     'classInfo': re.compile(r'Class\t(?P<startTime>\d{1,2}:\d{2} \w{2}) - (?P<endTime>\d{1,2}:\d{2} \w{2})\t('
                             r'?P<days>\w+)\t(?P<building>.*)\t(?P<startDate>.*) - (?P<endDate>.*)\t(?P<type>.*)\t.*\n')
 }
 
-timezone = pytz.timezone("US/Eastern")
+TIMEZONE = pytz.timezone("US/Eastern")
 
-weekdays = {
+WEEKDAYS = {
     'Monday': 0,
     'Tuesday': 1,
     'Wednesday': 2,
@@ -37,12 +27,21 @@ weekdays = {
 }
 
 
+class Course:
+    def __init__(self, name, code, section):
+        self.name = name
+        self.code = code
+        self.section = section
+
+
+
+
 def onDay(dt, day):
     return dt + timedelta(days=(day-dt.weekday()) % 7)
 
 
 def _parse_line(line):
-    for key, rx, in rx_dict.items():
+    for key, rx, in REGEX_DICTIONARY.items():
         match = rx.search(line)
         if match:
             return key, match
@@ -50,7 +49,7 @@ def _parse_line(line):
 
 
 def parse_file(path):
-    data = []
+    course_list = []
     with open(path, 'r') as file:
         for line in file:
             key, match = _parse_line(line)
@@ -79,19 +78,19 @@ def parse_file(path):
                 }
                 # TODO: figure out starting days
                 new_course.days = match.group('days')
-                courseList.append(new_course)
+                course_list.append(new_course)
 
-    pass
+    return course_list
 
 
-parse_file('paste.test.txt')
+course_list = parse_file('paste.test.txt')
 # parse_file('course.test.txt')
 
 
 cal = Calendar()
 rruleTemplate = []
 
-for course in courseList:
+for course in course_list:
     event = Event()
     event['summary'] = f'{course.code}-{course.section}'
     event['description'] = course.name
@@ -104,15 +103,6 @@ for course in courseList:
 
     event['dtstart'] = startDate
     event['duration'] = vDDDTypes(course.times['end'] - course.times['start'])
-    # event['rrule'] = [
-    #     'FREQ=WEEKLY',
-    #     'COUNT=12',
-    #     f'UNTIL={untilDate}',
-    #     # ESCAPES THE COMMAS???? WHAT DO I DO LOL???
-    #     # ?????????????????????????????????????
-    #     f'BYDAY={days_to_rrule(course.days)}'
-    # ]
-    # FOUND FORMAT IN GITHUB ISSUE
     event.add('rrule', {
         'FREQ': 'WEEKLY',
         'COUNT': 12,
@@ -140,7 +130,6 @@ for component in ecal.walk():
     if component.name == "VEVENT":
         print(component.get("summary"))
         print(component.get("description"))
-        print(component.get("organizer"))
         print(component.get("location"))
         print(component.decoded("dtstart"))
         print(component.decoded("duration"))
