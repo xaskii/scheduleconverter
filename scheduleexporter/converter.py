@@ -5,7 +5,7 @@ from icalendar import Calendar, Event,  vDDDTypes
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 
-from helper import objprint, i_cal_to_string, get_next_weekday, days_to_rrule
+from scheduleexporter.helper import objprint, i_cal_to_string, get_next_weekday, days_to_rrule
 
 REGEX_DICTIONARY = {
     'course': re.compile(r'(?P<name>.+) - (?P<code>.+) - (?P<section>\w+)\n'),
@@ -34,13 +34,11 @@ class Course:
         self.section = section
 
 
-
-
 def onDay(dt, day):
     return dt + timedelta(days=(day-dt.weekday()) % 7)
 
 
-def _parse_line(line):
+def parse_line(line):
     for key, rx, in REGEX_DICTIONARY.items():
         match = rx.search(line)
         if match:
@@ -48,11 +46,11 @@ def _parse_line(line):
     return None, None
 
 
-def parse_file(path):
+def parse_file(path) -> list[Course]:
     course_list = []
     with open(path, 'r') as file:
         for line in file:
-            key, match = _parse_line(line)
+            key, match = parse_line(line)
 
             if key == 'course':
                 new_course = None

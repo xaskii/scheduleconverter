@@ -1,6 +1,6 @@
 # scheduleconverter
 
-Converts "Detailed Schedule" page from Carleton Central to an **icalendar** that you can import
+Converts "Detailed Schedule" page from Carleton Central to an **icalendar** file that you can import
 
 ## Setup
 
