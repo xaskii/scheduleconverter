@@ -65,7 +65,7 @@ def main():
     parser = ArgumentParser(
         description="""Converts schedule paste into an icalendar file for import into the calendar application of your choice"""
     )
-    parser.add_argument("input_file", help="Path to paste containing default schedule")
+    parser.add_argument("input", help="Path to paste containing default schedule")
     parser.add_argument(
         "-o",
         "--output_file",
@@ -75,7 +75,7 @@ def main():
     )
     args = parser.parse_args()
 
-    calendar_path = Path(args.path)
+    calendar_path = Path(args.input)
 
     if not calendar_path.exists():
         print("Filepath not found, please check the path you've given.")
