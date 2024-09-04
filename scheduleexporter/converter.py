@@ -61,11 +61,18 @@ def ingest_paste(filepath: Path) -> list[Course]:
     return course_list
 
 
-# weird shit starts here
 def main():
-    parser = ArgumentParser()
-    parser.add_argument("path")
-    parser.add_argument("-o", "--output", default="example.ics", required=False)
+    parser = ArgumentParser(
+        description="""Converts schedule paste into an icalendar file for import into the calendar application of your choice"""
+    )
+    parser.add_argument("input_file", help="Path to paste containing default schedule")
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        default="timetable.ics",
+        required=False,
+        help="Output file path",
+    )
     args = parser.parse_args()
 
     calendar_path = Path(args.path)
