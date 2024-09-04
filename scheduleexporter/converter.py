@@ -1,129 +1,122 @@
-import re
 import os
-import pytz
-from icalendar import Calendar, Event,  vDDDTypes
-from datetime import datetime, timedelta
+from argparse import ArgumentParser
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+
 from dateutil.parser import parse
+from icalendar import Calendar, Event, vDDDTypes
 
-from scheduleexporter.helper import objprint, i_cal_to_string, get_next_weekday, days_to_rrule
-
-REGEX_DICTIONARY = {
-    'course': re.compile(r'(?P<name>.+) - (?P<code>.+) - (?P<section>\w+)\n'),
-    'instructor': re.compile(r'Assigned Instructor:\s(?P<instructor>.+)\n'),
-    'classInfo': re.compile(r'Class\t(?P<startTime>\d{1,2}:\d{2} \w{2}) - (?P<endTime>\d{1,2}:\d{2} \w{2})\t('
-                            r'?P<days>\w+)\t(?P<building>.*)\t(?P<startDate>.*) - (?P<endDate>.*)\t(?P<type>.*)\t.*\n')
-}
-
-TIMEZONE = pytz.timezone("US/Eastern")
-
-WEEKDAYS = {
-    'Monday': 0,
-    'Tuesday': 1,
-    'Wednesday': 2,
-    'Thursday': 3,
-    'Friday': 4,
-    'Saturday': 5,
-    'Sunday': 6,
-}
+from scheduleexporter.helper import days_to_rrule, get_next_weekday, parse_line
 
 
+@dataclass
 class Course:
-    def __init__(self, name, code, section):
-        self.name = name
-        self.code = code
-        self.section = section
+    name: str
+    code: str
+    section: str
+    instructor: str = ""
+    location: str = ""
+    _type: str = ""
+    times: dict[str, datetime] = field(default_factory=dict)
+    dates: dict[str, datetime] = field(default_factory=dict)
+    days: str = ""
 
 
-def onDay(dt, day):
-    return dt + timedelta(days=(day-dt.weekday()) % 7)
-
-
-def parse_line(line):
-    for key, rx, in REGEX_DICTIONARY.items():
-        match = rx.search(line)
-        if match:
-            return key, match
-    return None, None
-
-
-def parse_file(path) -> list[Course]:
+def ingest_paste(filepath: Path) -> list[Course]:
     course_list = []
-    with open(path, 'r') as file:
+    with filepath.open("r") as file:
+        current = None
         for line in file:
             key, match = parse_line(line)
+            if not match:
+                continue
 
-            if key == 'course':
-                new_course = None
-                name = match.group('name')
-                code = match.group('code')
-                section = match.group('section')
-                new_course = Course(name, code, section)
+            if key == "course":
+                name = match.group("name")
+                code = match.group("code")
+                section = match.group("section")
+                current = Course(name, code, section)
 
-            if key == 'instructor':
-                new_course.instructor = match.group('instructor')
+            if key == "instructor":
+                assert type(current) is Course
+                current.instructor = match.group("instructor")
 
-            if key == 'classInfo':
-                new_course.location = match.group('building')
-                # TODO: parse into date objects? done haha
-                new_course.type = match.group('type')
-                new_course.times = {
-                    'start': parse(match.group('startTime')),
-                    'end': parse(match.group('endTime'))
+            if key == "classInfo":
+                assert type(current) is Course
+                current.location = match.group("building")
+                current._type = match.group("type")
+                current.times = {
+                    "start": parse(match.group("startTime")),
+                    "end": parse(match.group("endTime")),
                 }
-                new_course.dates = {
-                    'start': parse(match.group('startDate')),
-                    'end': parse(match.group('endDate'))
+                current.dates = {
+                    "start": parse(match.group("startDate")),
+                    "end": parse(match.group("endDate")),
                 }
-                # TODO: figure out starting days
-                new_course.days = match.group('days')
-                course_list.append(new_course)
+                current.days = match.group("days")
+                course_list.append(current)
+                current = None
 
     return course_list
 
 
-course_list = parse_file('paste.test.txt')
+# weird shit starts here
+parser = ArgumentParser()
+parser.add_argument("path")
+parser.add_argument("-o", "--output", default="example.ics", required=False)
+args = parser.parse_args()
+
+calendar_path = Path(args.path)
+
+if not calendar_path.exists():
+    print("Filepath not found, please check the path you've given.")
+    raise SystemExit(1)
+
+course_list = ingest_paste(calendar_path)
 # parse_file('course.test.txt')
 
 
 cal = Calendar()
-rruleTemplate = []
 
 for course in course_list:
     event = Event()
-    event['summary'] = f'{course.code}-{course.section}'
-    event['description'] = course.name
-    event['location'] = course.location
+    event["summary"] = f"{course.code}-{course.section}"
+    event["description"] = course.name
+    event["location"] = course.location
 
     # untilDate = vDDDTypes(course.dates['end']).to_ical().decode('utf-8')
-    untilDate = course.dates['end']
-    startDate = vDDDTypes(datetime.combine(
-        get_next_weekday(course.dates['start'].date(), course.days[0]), course.times['start'].time()))
+    untilDate = course.dates["end"]
+    startDate = vDDDTypes(
+        datetime.combine(
+            get_next_weekday(course.dates["start"].date(), course.days[0]),
+            course.times["start"].time(),
+        )
+    )
 
-    event['dtstart'] = startDate
-    event['duration'] = vDDDTypes(course.times['end'] - course.times['start'])
-    event.add('rrule', {
-        'FREQ': 'WEEKLY',
-        'COUNT': 12,
-        'UNTIL': untilDate,
-        'BYDAY': days_to_rrule(course.days)
-    })
-
+    event["dtstart"] = startDate
+    event["duration"] = vDDDTypes(course.times["end"] - course.times["start"])
+    event.add(
+        "rrule",
+        {
+            "FREQ": "WEEKLY",
+            "COUNT": 12,
+            "UNTIL": untilDate,
+            "BYDAY": days_to_rrule(course.days),
+        },
+    )
     cal.add_component(event)
 
-    # break  # making first event
-
-# print(i_cal_to_string(cal))
 
 # write to file
-directory = os.getcwd()
-f = open(os.path.join(directory, 'example.ics'), 'wb')
+f = open(os.path.join(os.getcwd(), "example.ics"), "wb")
 f.write(cal.to_ical())
 f.close()
 
 
 print("CALENDAR SUMMARY:\n")
-e = open('example.ics', 'rb')
-ecal = Calendar.from_ical(e.read())
+e = open("example.ics", "rb")
+ecal = Calendar.from_ical(e.read().decode("utf-8"))
 for component in ecal.walk():
     if component.name == "VEVENT":
         print(component.get("summary"))
