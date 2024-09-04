@@ -7,7 +7,7 @@ from pathlib import Path
 from dateutil.parser import parse
 from icalendar import Calendar, Event, vDDDTypes
 
-from scheduleexporter.helper import days_to_rrule, get_next_weekday, parse_line
+from helper import days_to_rrule, get_next_weekday, parse_line
 
 
 @dataclass
