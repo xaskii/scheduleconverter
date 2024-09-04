@@ -36,9 +36,9 @@ wheels = [
 ]
 
 [[package]]
-name = "scheduleconverter"
+name = "scheduleexporter"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "icalendar" },
 ]
