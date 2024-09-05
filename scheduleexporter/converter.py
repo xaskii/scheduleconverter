@@ -24,7 +24,7 @@ class Course:
 
 
 def ingest_paste(filepath: Path) -> list[Course]:
-    course_list = []
+    course_list: list[Course] = []
     with filepath.open("r") as file:
         current = None
         for line in file:
@@ -82,7 +82,6 @@ def main():
         raise SystemExit(1)
 
     course_list = ingest_paste(calendar_path)
-    # parse_file('course.test.txt')
 
     cal = Calendar()
 
@@ -92,23 +91,26 @@ def main():
         event["description"] = course.name
         event["location"] = course.location
 
-        # untilDate = vDDDTypes(course.dates['end']).to_ical().decode('utf-8')
-        untilDate = course.dates["end"]
-        startDate = vDDDTypes(
+        until_date = course.dates["end"]
+
+        first_day = min(
+            (get_next_weekday(course.dates["start"].date(), day) for day in course.days)
+        )
+        start_date = vDDDTypes(
             datetime.combine(
-                get_next_weekday(course.dates["start"].date(), course.days[0]),
+                first_day,
                 course.times["start"].time(),
             )
         )
 
-        event["dtstart"] = startDate
+        event["dtstart"] = start_date
         event["duration"] = vDDDTypes(course.times["end"] - course.times["start"])
         event.add(
             "rrule",
             {
                 "FREQ": "WEEKLY",
                 "COUNT": 12,
-                "UNTIL": untilDate,
+                "UNTIL": until_date,
                 "BYDAY": days_to_rrule(course.days),
             },
         )
@@ -131,6 +133,7 @@ def main():
             print(component.decoded("duration"))
             print()
     e.close()
+
 
 if __name__ == "__main__":
     main()
