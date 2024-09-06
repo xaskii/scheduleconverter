@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from dateutil.parser import parse
@@ -91,32 +91,30 @@ def main():
         event["description"] = course.name
         event["location"] = course.location
 
-        until_date = course.dates["end"]
-
         first_day = min(
             (get_next_weekday(course.dates["start"].date(), day) for day in course.days)
         )
-        start_date = vDDDTypes(
+
+        event["dtstart"] = vDDDTypes(
             datetime.combine(
                 first_day,
                 course.times["start"].time(),
             )
         )
 
-        event["dtstart"] = start_date
         event["duration"] = vDDDTypes(course.times["end"] - course.times["start"])
+
+        end_date = course.dates["end"]
         event.add(
             "rrule",
             {
                 "FREQ": "WEEKLY",
-                "COUNT": 12,
-                "UNTIL": until_date,
+                "UNTIL": end_date + timedelta(days=1),
                 "BYDAY": days_to_rrule(course.days),
             },
         )
         cal.add_component(event)
 
-    # write to file
     f = open(os.path.join(os.getcwd(), "example.ics"), "wb")
     f.write(cal.to_ical())
     f.close()
@@ -131,6 +129,7 @@ def main():
             print(component.get("location"))
             print(component.decoded("dtstart"))
             print(component.decoded("duration"))
+            # print(component.decoded("rrule"))
             print()
     e.close()
 

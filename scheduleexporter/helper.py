@@ -1,5 +1,6 @@
 import re
 from datetime import date, timedelta
+from enum import Enum
 from pprint import pprint
 from typing import Optional
 
@@ -17,42 +18,29 @@ REGEX_DICTIONARY = {
 }
 
 
-def objprint(obj):
-    pprint(obj.__dict__, indent=2)
+class Weekday(Enum):
+    M = (0, "MO")
+    T = (1, "TU")
+    W = (2, "WE")
+    R = (3, "TH")
+    F = (4, "FR")
+
+    @property
+    def weekday_index(self) -> int:
+        return self.value[0]
+
+    @property
+    def rrule_code(self) -> str:
+        return self.value[1]
 
 
-def ical_to_string(cal: Calendar) -> str:
-    return cal.to_ical().decode("utf-8").replace("\r\n", "\n").strip()
-
-
-def on_day(dt: date, day: int):
-    return dt + timedelta(days=(day - dt.weekday()) % 7)
-
-
-def get_next_weekday(dt: date, dayChar: str):
-    lookup = {
-        "M": 0,
-        "T": 1,
-        "W": 2,
-        "R": 3,
-        "F": 4,
-    }
-    return on_day(dt, lookup[dayChar])
+def get_next_weekday(dt: date, day_char: str) -> date:
+    target_weekday = Weekday[day_char]
+    return dt + timedelta(days=(target_weekday.weekday_index - dt.weekday()) % 7)
 
 
 def days_to_rrule(days: str) -> list[str]:
-    codes = []
-    lookup = {
-        "M": "MO",
-        "T": "TU",
-        "W": "WE",
-        "R": "TH",
-        "F": "FR",
-    }
-    for day in days:
-        codes.append(lookup[day])
-
-    return codes
+    return [Weekday[day].rrule_code for day in days]
 
 
 def parse_line(line: str) -> tuple[Optional[str], Optional[re.Match]]:
@@ -60,3 +48,11 @@ def parse_line(line: str) -> tuple[Optional[str], Optional[re.Match]]:
         if match := pattern.search(line):
             return key, match
     return None, None
+
+
+def objprint(obj):
+    pprint(obj.__dict__, indent=2)
+
+
+def ical_to_string(cal: Calendar) -> str:
+    return cal.to_ical().decode("utf-8").replace("\r\n", "\n").strip()
