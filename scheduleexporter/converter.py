@@ -98,19 +98,19 @@ def create_calendar_event(course: Course) -> CalendarEvent:
     )
 
 
-def create_ical_event(cal_event: CalendarEvent) -> Event:
+def create_ical_event(calendar_event: CalendarEvent) -> Event:
     event = Event()
-    event["summary"] = cal_event.summary
-    event["description"] = cal_event.description
-    event["location"] = cal_event.location
-    event["dtstart"] = vDDDTypes(cal_event.start_time)
-    event["duration"] = vDDDTypes(cal_event.duration)
+    event["summary"] = calendar_event.summary
+    event["description"] = calendar_event.description
+    event["location"] = calendar_event.location
+    event["dtstart"] = vDDDTypes(calendar_event.start_time)
+    event["duration"] = vDDDTypes(calendar_event.duration)
     event.add(
         "rrule",
         {
             "FREQ": "WEEKLY",
-            "UNTIL": cal_event.end_date + timedelta(days=1),
-            "BYDAY": days_to_rrule(cal_event.days),
+            "UNTIL": calendar_event.end_date + timedelta(days=1),
+            "BYDAY": days_to_rrule(calendar_event.days),
         },
     )
     return event
