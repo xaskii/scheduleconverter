@@ -11,7 +11,6 @@ from icalendar import Calendar, Event, vDDDTypes
 from scheduleexporter.helper import days_to_rrule, get_next_weekday, parse_line
 
 DEFAULT_OUTPUT_FILE = "timetable.ics"
-CALENDAR_SUMMARY_FILE = "example.ics"
 
 
 @dataclass
@@ -167,7 +166,7 @@ def main():
         ical_event = create_ical_event(cal_event)
         cal.add_component(ical_event)
 
-    output_path = os.path.join(os.getcwd(), CALENDAR_SUMMARY_FILE)
+    output_path = os.path.join(os.getcwd(), args.output_file or DEFAULT_OUTPUT_FILE)
     write_calendar(cal, output_path)
     print_calendar_summary(output_path)
 
