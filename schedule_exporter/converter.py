@@ -4,11 +4,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 from dateutil.parser import parse
 from icalendar import Calendar, Event, vDDDTypes
 
-from scheduleexporter.helper import days_to_rrule, get_next_weekday, parse_line
+from .helper import days_to_rrule, get_next_weekday, parse_line
 
 DEFAULT_OUTPUT_FILE = "timetable.ics"
 
@@ -82,7 +83,9 @@ def create_calendar_event(course: Course) -> CalendarEvent:
     first_day = min(
         (get_next_weekday(course.dates["start"].date(), day) for day in course.days)
     )
-    start_time = datetime.combine(first_day, course.times["start"].time())
+    start_time = datetime.combine(
+        first_day, course.times["start"].time(), tzinfo=ZoneInfo("EST")
+    )
     duration = course.times["end"] - course.times["start"]
     end_date = course.dates["end"]
 
