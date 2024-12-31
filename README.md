@@ -5,16 +5,24 @@ Converts "Detailed Schedule" page from Carleton Central to an **icalendar** file
 ## Usage
 
 ```bash
-uv sync
-uv run scheduleexporter/converter.py \<path of paste here\>
+# If you have uv installed already
+uv run schedule-exporter --help
+uv run schedule-exporter paste.txt
+```
+
+```bash
+# Creating virtual env and installing dependencies
+python -m venv .venv
+source ./.venv/bin/activate
+pip install -r pyproject.toml
+
+# Using the tool
+schedule-exporter --help
+schedule-exporter paste.txt
 ```
 
 ## TODO
 
+- [ ] get rid of 'icalendar' dependency, and create an ICS file based on the RFC (in source control)
 - [ ] Add e2e tests comparing generated `.ics` files
-- [ ] Switch back over to requirements.txt
-- [ ] Turn into small web-app and deploy it on a box somewhere
-
-## Notes
-
-- Timezones are really scary 😟
+- [ ]
