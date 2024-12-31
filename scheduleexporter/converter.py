@@ -134,7 +134,7 @@ def print_calendar_summary(filepath: str):
                 print()
 
 
-def main():
+def main() -> int:
     parser = ArgumentParser(
         description="Converts schedule paste into an icalendar file for import into the calendar application of your choice"
     )
