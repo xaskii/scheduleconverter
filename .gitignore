@@ -1,8 +1,8 @@
-.vscode
-*.test.txt
+.vscode/
+.venv/
+.idea/
 __pycache__/
-.venv
-.idea
-dist/
-example.ics
+
+*.test.txt
 schedule.txt
+timetable.ics
