@@ -28,14 +28,14 @@ wheels = [
 
 [[package]]
 name = "schedule-exporter"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "icalendar" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "icalendar", specifier = ">=5.0.13" }]
+requires-dist = [{ name = "icalendar", specifier = ">=6.1.0" }]
 
 [[package]]
 name = "six"

@@ -25,4 +25,3 @@ schedule-exporter paste.txt
 
 - [ ] get rid of 'icalendar' dependency, and create an ICS file based on the RFC (in source control)
 - [ ] Add e2e tests comparing generated `.ics` files
-- [ ]

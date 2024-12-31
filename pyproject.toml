@@ -1,13 +1,13 @@
 [project]
 name = "schedule-exporter"
-version = "0.1.0"
+version = "1.0.0"
 description = "Converts university timetable to an importable calendar file."
 authors = [{name = "Xavi", email = "xavisimpson04@gmail.com"}]
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "icalendar>=5.0.13",
+    "icalendar>=6.1.0",
 ]
 
 [project.scripts]
