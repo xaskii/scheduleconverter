@@ -2,13 +2,15 @@
 name = "schedule-exporter"
 version = "1.0.0"
 description = "Converts university timetable to an importable calendar file."
-authors = [{name = "Xavi", email = "xavisimpson04@gmail.com"}]
+authors = [{ name = "Xavi", email = "xavisimpson04@gmail.com" }]
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "icalendar>=6.1.0",
-]
+dependencies = ["icalendar>=6.1.0", "types-icalendar>=6.3.1.20250521"]
+
+[tool.pyrefly]
+project-includes = ["**/*"]
+project-excludes = ["**/*venv/**/*"]
 
 [project.scripts]
 schedule-exporter = "schedule_exporter.converter:main"
