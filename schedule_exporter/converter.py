@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
 from zoneinfo import ZoneInfo
 
 from dateutil.parser import parse
@@ -22,8 +21,8 @@ class Course:
     instructor: str = ""
     location: str = ""
     _type: str = ""
-    times: Dict[str, datetime] = field(default_factory=dict)
-    dates: Dict[str, datetime] = field(default_factory=dict)
+    times: dict[str, datetime] = field(default_factory=dict)
+    dates: dict[str, datetime] = field(default_factory=dict)
     days: str = ""
 
 
@@ -38,11 +37,11 @@ class CalendarEvent:
     days: str
 
 
-def ingest_paste(filepath: Path) -> List[Course]:
-    course_list: List[Course] = []
+def ingest_paste(filepath: Path) -> list[Course]:
+    course_list: list[Course] = []
     try:
         with filepath.open("r") as file:
-            current: Optional[Course] = None
+            current: Course | None = None
             for line in file:
                 key, match = parse_line(line)
                 if not match:
