@@ -35,12 +35,12 @@ class Weekday(Enum):
 
 
 def get_next_weekday(dt: date, day_char: str) -> date:
-    target_weekday = Weekday(day_char)
+    target_weekday = Weekday[day_char]
     return dt + timedelta(days=(target_weekday.weekday_index - dt.weekday()) % 7)
 
 
 def days_to_rrule(days: str) -> list[str]:
-    return [Weekday(day).rrule_code for day in days]
+    return [Weekday[day].rrule_code for day in days]
 
 
 def parse_line(line: str) -> tuple[Optional[str], Optional[re.Match]]:
