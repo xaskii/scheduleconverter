@@ -83,7 +83,7 @@ def create_calendar_event(course: Course) -> CalendarEvent:
         (get_next_weekday(course.dates["start"].date(), day) for day in course.days)
     )
     start_time = datetime.combine(
-        first_day, course.times["start"].time(), tzinfo=ZoneInfo("EST")
+        first_day, course.times["start"].time(), tzinfo=ZoneInfo("America/Toronto")
     )
     duration = course.times["end"] - course.times["start"]
     end_date = course.dates["end"]
